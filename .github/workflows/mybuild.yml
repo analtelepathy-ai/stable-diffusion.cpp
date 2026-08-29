@@ -1,4 +1,4 @@
-name: Build stable-diffusion
+name: SD Build v2
 
 on:
   workflow_dispatch:
@@ -13,10 +13,13 @@ jobs:
           submodules: recursive
 
       - name: Configure
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DGGML_OPENMP=OFF
 
       - name: Build
         run: cmake --build build --config Release -j2
+
+      - name: List build output
+        run: find build/bin -type f
 
       - name: Upload binary
         uses: actions/upload-artifact@v4
