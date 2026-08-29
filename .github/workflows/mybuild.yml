@@ -1,4 +1,4 @@
-name: SD Build v2
+name: SD Build v4
 
 on:
   workflow_dispatch:
@@ -6,6 +6,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-24.04-arm
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -13,18 +14,29 @@ jobs:
           submodules: recursive
 
       - name: Configure
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DGGML_OPENMP=OFF
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DGGML_OPENMP=OFF
 
       - name: Build
-        run: cmake --build build --config Release -j2
+        run: |
+          cmake --build build --config Release -j2
 
-      - name: List build output
-        run: find build/bin -type f
+      - name: Find binaries
+        run: |
+          echo "=== BUILD OUTPUT ==="
+          find build -type f \( -name "sd-cli" -o -name "sd-server" \) -print
 
-      - name: Upload binary
+      - name: Check binary architecture
+        run: |
+          file $(find build -type f -name "sd-cli" | head -1)
+
+      - name: Upload binaries
         uses: actions/upload-artifact@v4
         with:
-          name: sd-binaries
+          name: sd-binaries-android-arm64
           path: |
             build/bin/sd-cli
             build/bin/sd-server
+          if-no-files-found: error
