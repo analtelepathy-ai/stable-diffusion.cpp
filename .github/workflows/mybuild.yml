@@ -1,0 +1,25 @@
+name: Build stable-diffusion
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --config Release -j2
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: stable-diffusion-arm64
+          path: build/bin/stable-diffusion
